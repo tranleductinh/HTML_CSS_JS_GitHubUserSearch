@@ -1,0 +1,111 @@
+let theme = localStorage.getItem("theme");
+const themeToggle = document.getElementById("themeToggle");
+const usernameInput = document.getElementById("usernameInput");
+const searchForm = document.getElementById("searchForm");
+const userInfo = document.getElementById("userInfo");
+const userCard = document.getElementById("userCard");
+const errorMessage = document.getElementById("errorMessage");
+const welcomeMessage = document.getElementById("welcomeMessage");
+const loadingState = document.getElementById("loadingState");
+const searchButton = document.getElementById("searchButton");
+const searchText = document.getElementById("searchText");
+
+if (!theme) {
+  const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  theme = systemDark ? "dark" : "light";
+  localStorage.setItem("theme", theme);
+}
+
+if (theme === "dark") {
+  document.body.classList.add("dark");
+} else {
+  document.body.classList.remove("dark");
+}
+
+themeToggle.addEventListener("click", (e) => {
+  e.preventDefault();
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme", theme);
+});
+
+searchForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const usernameInput = document.getElementById("usernameInput").value;
+  if (usernameInput.length > 0) {
+    searchButton.disabled = true;
+    searchText.innerText = "Search...";
+    errorMessage.classList.add("hidden");
+    welcomeMessage.classList.add("hidden");
+    userCard.classList.add("hidden");
+    loadingState.classList.remove("hidden");
+    getUser(usernameInput);
+  }
+});
+
+async function getUser(user) {
+  try {
+    const response = await fetch(`https://api.github.com/users/${user}`);
+    searchButton.disabled = false;
+    searchText.innerText = "Search";
+    if (!response.ok) {
+      throw new Error("User not found");
+    }
+    const data = await response.json();
+    if (data.length === 0) {
+      errorMessage.classList.remove("hidden");
+      errorText.innerText = "User not found";
+    }
+    userCard.classList.remove("hidden");
+    loadingState.classList.add("hidden");
+    renderUser(data);
+  } catch (error) {
+    loadingState.classList.add("hidden");
+    errorMessage.classList.remove("hidden");
+    errorText.innerText = error.message;
+  }
+}
+
+function renderUser(data) {
+  if (data.bio == null) {
+    data.bio = "This profile has no bio";
+  }
+  userInfo.innerHTML = `
+    <div class="user-avatar">
+        <img
+            src="${data.avatar_url}"
+            alt="tranleductinh"
+            class="avatar"
+            onerror="this.src='/diverse-user-avatars.png'"
+        />
+        </div>
+        <div class="user-details">
+        <h2 class="user-name">${data.login}</h2>
+        <a
+            href="https://github.com/${data.login}"
+            target="_blank"
+            class="user-username"
+            >@${data.login}</a
+        >
+        <p class="user-bio">${data.bio}</p>
+        <div class="user-stats">
+            <div class="stat-badge">
+                <span class="stat-number">${data.public_repos}</span> Repos
+                </div>
+                <div class="stat-badge">
+                <span class="stat-number">${data.followers}</span> Followers
+                </div>
+                <div class="stat-badge">
+                <span class="stat-number">${data.following}</span> Following
+            </div>
+        </div>
+        <div class="user-meta">
+            <div class="meta-item"><span>Joined ${new Date(
+              data.created_at
+            ).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}</span></div>
+        </div>
+    </div>`;
+}
