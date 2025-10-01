@@ -49,21 +49,17 @@ async function getUser(user) {
     searchText.innerText = "Search";
     if (!response.ok) {
       const errData = await response.json();
-      throw new Error(errData.message);
+      throw new Error(errData.status ? "User not found" : "Failed to fetch user data");
     }
     const data = await response.json();
-    if (data.length === 0) {
-      errorMessage.classList.remove("hidden");
-      errorText.innerText = "User not found";
-    }
     userCard.classList.remove("hidden");
     loadingState.classList.add("hidden");
     renderUser(data);
   } catch (err) {
-    console.log(err.message);
+    console.log(err);
     loadingState.classList.add("hidden");
     errorMessage.classList.remove("hidden");
-    errorText.innerText = err;
+    errorText.innerText = err.message
   }
 }
 
