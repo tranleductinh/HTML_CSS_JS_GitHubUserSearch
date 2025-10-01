@@ -48,7 +48,8 @@ async function getUser(user) {
     searchButton.disabled = false;
     searchText.innerText = "Search";
     if (!response.ok) {
-      throw new Error("User not found");
+      const errData = await response.json();
+      throw new Error(errData.message);
     }
     const data = await response.json();
     if (data.length === 0) {
@@ -58,10 +59,11 @@ async function getUser(user) {
     userCard.classList.remove("hidden");
     loadingState.classList.add("hidden");
     renderUser(data);
-  } catch (error) {
+  } catch (err) {
+    console.log(err.message);
     loadingState.classList.add("hidden");
     errorMessage.classList.remove("hidden");
-    errorText.innerText = error.message;
+    errorText.innerText = err;
   }
 }
 
@@ -79,7 +81,7 @@ function renderUser(data) {
         />
         </div>
         <div class="user-details">
-        <h2 class="user-name">${data.login}</h2>
+        <h2 class="user-name">${data.name || data.login}</h2>
         <a
             href="https://github.com/${data.login}"
             target="_blank"
@@ -98,14 +100,42 @@ function renderUser(data) {
                 <span class="stat-number">${data.following}</span> Following
             </div>
         </div>
-        <div class="user-meta">
+        <div id="userMeta" class="user-meta">
             <div class="meta-item"><span>Joined ${new Date(
               data.created_at
             ).toLocaleDateString("en-US", {
               year: "numeric",
               month: "short",
               day: "numeric",
-            })}</span></div>
+            })}</span></div>      
         </div>
     </div>`;
+  const userMeta = document.getElementById("userMeta");
+  if (data.location != null) {
+    userMeta.innerHTML += `
+      <div class="meta-item">
+        <span>
+            ${data.location}
+        </span>
+      </div>
+      `;
+  }
+  if (data.blog != "") {
+    userMeta.innerHTML += `
+    <div class="meta-item">
+        <a href="${data.blog} kkkk" target="_blank">
+            ${data.blog}
+        </a>
+    </div>
+      `;
+  }
+  if (data.twitter_username != null) {
+    userMeta.innerHTML += `
+    <div class="meta-item">
+              <a href="https://twitter.com/${data.twitter_username}" target="_blank">
+              @${data.twitter_username}
+              </a>
+            </div>
+    `;
+  }
 }
