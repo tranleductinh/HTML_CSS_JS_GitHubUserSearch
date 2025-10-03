@@ -25,7 +25,11 @@ if (theme === "dark") {
 themeToggle.addEventListener("click", (e) => {
   e.preventDefault();
   document.body.classList.toggle("dark");
-  localStorage.setItem("theme", theme);
+  if (document.body.classList.contains("dark")) {
+    localStorage.setItem("theme", "dark");
+  } else {
+    localStorage.setItem("theme", "light");
+  }
 });
 
 searchForm.addEventListener("submit", (e) => {
@@ -49,7 +53,9 @@ async function getUser(user) {
     searchText.innerText = "Search";
     if (!response.ok) {
       const errData = await response.json();
-      throw new Error(errData.status ? "User not found" : "Failed to fetch user data");
+      throw new Error(
+        errData.status ? "User not found" : "Failed to fetch user data"
+      );
     }
     const data = await response.json();
     userCard.classList.remove("hidden");
@@ -59,7 +65,7 @@ async function getUser(user) {
     console.log(err);
     loadingState.classList.add("hidden");
     errorMessage.classList.remove("hidden");
-    errorText.innerText = err.message
+    errorText.innerText = err.message;
   }
 }
 

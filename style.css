@@ -219,6 +219,10 @@ body {
   animation: spin 1s linear infinite;
   margin: 0 auto 16px;
 }
+input:-webkit-autofill {
+  -webkit-text-fill-color: #fff !important;
+  transition: background-color 9999s ease-in-out 0s !important;
+}
 @keyframes spin {
   0% {
     transform: rotate(0deg);
